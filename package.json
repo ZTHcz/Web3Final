@@ -1,0 +1,31 @@
+{
+  "name": "web3final",
+  "version": "1.0.0",
+  "description": "web 3 final",
+  "main": "index.js",
+  "dependencies": {
+    "babylonjs": "^4.0.3",
+    "babylonjs-gui": "^4.0.3",
+    "babylonjs-loaders": "^4.0.3",
+    "babylonjs-materials": "^4.0.3",
+    "babylonjs-post-process": "^4.0.3",
+    "babylonjs-procedural-textures": "^4.0.3",
+    "babylonjs-serializers": "^4.0.3",
+    "babylonjs-viewer": "^4.0.3",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZTHcz/Web3Final.git"
+  },
+  "author": "Zach Hart",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ZTHcz/Web3Final/issues"
+  },
+  "homepage": "https://github.com/ZTHcz/Web3Final#readme"
+}

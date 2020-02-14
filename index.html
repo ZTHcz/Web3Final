@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,8 +11,71 @@
             height:100%;
         }
     </style>
+    <script src="./node_modules/babylonjs/babylon.js"></script>
+    <script src="./cannon.js/build/cannon.js"></script>
+    <!-- this is needed for BJS to load scene files 
+    <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script> -->
 </head>
 <body>
-    
+    <canvas id="canvas"></canvas>
+
+    <script>
+    window.addEventListener('DOMContentLoaded', function(){
+        var canvas = document.getElementById('canvas');
+
+        var engine = new BABYLON.Engine(canvas, true);
+        engine.enableOfflineSupport = false; // Dont require a manifest file
+        var createScene = function(){
+            var scene = new BABYLON.Scene(engine);
+            scene.clearColor = new BABYLON.Color3.Gray();
+            var gravityVector = new BABYLON.Vector3(0,-9.81, 0);
+            var physicsPlugin = new BABYLON.CannonJSPlugin();
+            scene.enablePhysics(gravityVector, physicsPlugin);
+            
+            var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);1
+            
+            //ground
+            var ground = BABYLON.MeshBuilder.CreateGround("ground", {height: 40, width: 40, subdivisions: 4}, scene);
+            ground.material = new BABYLON.StandardMaterial("material2",scene);
+            ground.material.diffuseColor = BABYLON.Color3.Green();
+            //player box
+            var playerBox = BABYLON.Mesh.CreateBox("Box",4.0,scene);
+            playerBox.position = new BABYLON.Vector3(0,3,0);
+            playerBox.material = new BABYLON.StandardMaterial("material",scene);
+            playerBox.material.diffuseColor = BABYLON.Color3.Blue();
+
+            //camera
+            /*
+            var camera = new BABYLON.FollowCamera("followCam", BABYLON.Vector3.Zero(), scene);
+            camera.target = playerBox;
+            camera.radius = 50;
+            camera.heightOffset = 5;
+            camera.attachControl(canvas,true);
+            scene.activeCamera = camera;
+            */
+            var camera = new BABYLON.ArcRotateCamera("arcCam",
+                    BABYLON.Tools.ToRadians(45),
+                    BABYLON.Tools.ToRadians(45),
+                    10.0,playerBox.position,scene);
+            camera.attachControl(canvas,true);
+
+            //enable physics
+            playerBox.physicsImpostor = new BABYLON.PhysicsImpostor(playerBox, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 2, friction: 0.0, restitution: 0.3 }, scene);
+            ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.0, restitution: 0.7 }, scene);
+            
+            return scene;
+        }
+
+        var scene = createScene();
+        engine.runRenderLoop(function(){
+            scene.getMeshByName("Box").position.y += 0.1;
+            scene.render();
+        });
+
+    });
+        
+
+    </script>
+
 </body>
 </html>
