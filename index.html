@@ -1,14 +1,14 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        #canvas{
-            width:100%;
-            height:100%;
+        #canvas {
+            width: 100%;
+            height: 100%;
         }
     </style>
     <script src="./node_modules/babylonjs/babylon.js"></script>
@@ -16,66 +16,199 @@
     <!-- this is needed for BJS to load scene files 
     <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script> -->
 </head>
+
 <body>
     <canvas id="canvas"></canvas>
 
     <script>
-    window.addEventListener('DOMContentLoaded', function(){
-        var canvas = document.getElementById('canvas');
+        window.addEventListener('DOMContentLoaded', function () {
+            var canvas = document.getElementById('canvas');
 
-        var engine = new BABYLON.Engine(canvas, true);
-        engine.enableOfflineSupport = false; // Dont require a manifest file
-        var createScene = function(){
-            var scene = new BABYLON.Scene(engine);
-            scene.clearColor = new BABYLON.Color3.Gray();
-            var gravityVector = new BABYLON.Vector3(0,-9.81, 0);
-            var physicsPlugin = new BABYLON.CannonJSPlugin();
-            scene.enablePhysics(gravityVector, physicsPlugin);
-            
-            var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene);1
-            
-            //ground
-            var ground = BABYLON.MeshBuilder.CreateGround("ground", {height: 40, width: 40, subdivisions: 4}, scene);
-            ground.material = new BABYLON.StandardMaterial("material2",scene);
-            ground.material.diffuseColor = BABYLON.Color3.Green();
-            //player box
-            var playerBox = BABYLON.Mesh.CreateBox("Box",4.0,scene);
-            playerBox.position = new BABYLON.Vector3(0,3,0);
-            playerBox.material = new BABYLON.StandardMaterial("material",scene);
-            playerBox.material.diffuseColor = BABYLON.Color3.Blue();
+            var engine = new BABYLON.Engine(canvas, true);
+            engine.enableOfflineSupport = false; // Dont require a manifest file
+            var createScene = function () {
+                var scene = new BABYLON.Scene(engine);
+                scene.clearColor = new BABYLON.Color3.Gray();
+                var gravityVector = new BABYLON.Vector3(0, -9.81, 0);
+                var physicsPlugin = new BABYLON.CannonJSPlugin();
+                scene.enablePhysics(gravityVector, physicsPlugin);
 
-            //camera
-            /*
-            var camera = new BABYLON.FollowCamera("followCam", BABYLON.Vector3.Zero(), scene);
-            camera.target = playerBox;
-            camera.radius = 50;
-            camera.heightOffset = 5;
-            camera.attachControl(canvas,true);
-            scene.activeCamera = camera;
-            */
-            var camera = new BABYLON.ArcRotateCamera("arcCam",
+                var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene); 1
+
+                //ground
+                var ground = BABYLON.MeshBuilder.CreateGround("ground", { height: 500, width: 500, subdivisions: 4 }, scene);
+                ground.material = new BABYLON.StandardMaterial("material2", scene);
+                ground.material.diffuseColor = BABYLON.Color3.Green();
+                //player box
+                var playerBox = BABYLON.Mesh.CreateBox("Box", 4.0, scene);
+                playerBox.position = new BABYLON.Vector3(0, 3, 0);
+                playerBox.material = new BABYLON.StandardMaterial("material", scene);
+                playerBox.material.diffuseColor = BABYLON.Color3.Blue();
+
+                //load knight model (not working)
+                /*
+                BABYLON.SceneLoader.ImportMesh("Circle", "./models/", "knight.babylon", this._scene, function(newMeshes, particleSystems, skeleton){
+                    try{
+                        var skeleton = skeletons[0];
+                        skeleton.animationPropertiesOverride = new BABYLON.AnimationPropertiesOverride();
+                        skeleton.animationPropertiesOverride.enableBlending = true;
+                        skeleton.animationPropertiesOverride.blendingSpeed = 0.05;
+                        skeleton.animationPropertiesOverride.loopMode = 1;
+                        //animations
+                        var idleRange = skeleton.getAnimationRange("Idle");
+                        var walkRange = skeleton.getAnimationRange("Walk");
+                        var animating = false;
+
+                        scene.onBeforeRenderObservable.add(()=>{
+                            var keydown = false;
+                            if(inputMap["w"] || inputMap["ArrowUp"]){
+                                newMeshes[0].position.z+=0.1
+                                newMeshes[0].rotation.y = 0
+                                keydown=true;
+                            } 
+                            if(inputMap["a"] || inputMap["ArrowLeft"]){
+                                newMeshes[0].position.x-=0.1
+                                newMeshes[0].rotation.y = 3*Math.PI/2
+                                keydown=true;
+                            } 
+                            if(inputMap["s"] || inputMap["ArrowDown"]){
+                                newMeshes[0].position.z-=0.1
+                                newMeshes[0].rotation.y = 2*Math.PI/2
+                                keydown=true;
+                            } 
+                            if(inputMap["d"] || inputMap["ArrowRight"]){
+                                newMeshes[0].position.x+=0.1
+                                newMeshes[0].rotation.y = Math.PI/2
+                                keydown=true;
+                            }
+                            if(keydown){
+                                if(!animating){
+                                    animating = true;
+                                    scene.beginAnimation(skeleton, walkRange.from, walkRange.to, true);
+                                }
+                            }else{
+                                animating = false;
+                                scene.stopAnimation(skeleton)
+                            }
+                        })
+                    }catch(e){console.log(e)}
+                });
+                */
+
+                //camera
+                /*
+                var camera = new BABYLON.FollowCamera("followCam", BABYLON.Vector3.Zero(), scene);
+                camera.target = playerBox;
+                camera.radius = 50;
+                camera.heightOffset = 5;
+                camera.attachControl(canvas,true);
+                scene.activeCamera = camera;
+                */
+                var camera = new BABYLON.ArcRotateCamera("arcCam",
                     BABYLON.Tools.ToRadians(45),
                     BABYLON.Tools.ToRadians(45),
-                    10.0,playerBox.position,scene);
-            camera.attachControl(canvas,true);
+                    10.0, playerBox.position, scene);
+                camera.attachControl(canvas, true);
 
-            //enable physics
-            playerBox.physicsImpostor = new BABYLON.PhysicsImpostor(playerBox, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 2, friction: 0.0, restitution: 0.3 }, scene);
-            ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.0, restitution: 0.7 }, scene);
-            
-            return scene;
-        }
+                //enable physics
+                playerBox.physicsImpostor = new BABYLON.PhysicsImpostor(playerBox, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 2, friction: 0.0, restitution: 0.3 }, scene);
+                ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.0, restitution: 0.7 }, scene);
 
-        var scene = createScene();
-        engine.runRenderLoop(function(){
-            scene.getMeshByName("Box").position.y += 0.1;
-            scene.render();
+                //Keyboard
+                return scene;
+            }
+
+            var scene = createScene();
+            engine.runRenderLoop(function () {
+                document.addEventListener('keydown', function(event) {
+                    if(event.keyCode == 87) {
+                        console.log("W");
+                        scene.getMeshByName("Box").position.z += 0.01;
+                        if(scene.getMeshByName("Box").position.y < 0){
+                            console.log("fell off");
+                            scene.getMeshByName("Box").collisionsEnabled = false;
+                            scene.getMeshByName("Box").setPositionWithLocalVector(new BABYLON.Vector3(0, 3, 0));
+                            scene.getMeshByName("Box").collisionsEnabled = true;
+                        }
+                        scene.getMeshByName("Box").position.x == 0;
+                    }
+                    if(event.keyCode == 65) {
+                        console.log("A");
+                        scene.getMeshByName("Box").position.x -= 0.01;
+                        if(scene.getMeshByName("Box").position.y < 0){
+                            console.log("fell off");
+                            scene.getMeshByName("Box").collisionsEnabled = false;
+                            scene.getMeshByName("Box").setPositionWithLocalVector(new BABYLON.Vector3(0, 3, 0));
+                            scene.getMeshByName("Box").collisionsEnabled = true;
+                        }
+                        scene.getMeshByName("Box").position.x == 0;
+                    }
+                    if(event.keyCode == 83){
+                        console.log("S");
+                        scene.getMeshByName("Box").position.z -= 0.01;
+                            if(scene.getMeshByName("Box").position.y < 0){
+                            console.log("fell off");
+                            scene.getMeshByName("Box").collisionsEnabled = false;
+                            scene.getMeshByName("Box").setPositionWithLocalVector(new BABYLON.Vector3(0, 3, 0));
+                            scene.getMeshByName("Box").collisionsEnabled = true;
+                        }
+                        scene.getMeshByName("Box").position.x == 0;
+                    }
+                    if(event.keyCode == 68) {
+                        console.log("D");
+                        scene.getMeshByName("Box").position.x += 0.01
+                        if(scene.getMeshByName("Box").position.y < 0){
+                            console.log("fell off");
+                            scene.getMeshByName("Box").collisionsEnabled = false;
+                            scene.getMeshByName("Box").setPositionWithLocalVector(new BABYLON.Vector3(0, 3, 0));
+                            scene.getMeshByName("Box").collisionsEnabled = true;
+                        }
+                        scene.getMeshByName("Box").position.x == 0;
+                    }
+                });
+                // Keyboard events reference
+                /*
+                var inputMap = {};
+                scene.actionManager = new BABYLON.ActionManager(scene);
+                scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {
+                    inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+                }));
+                scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function (evt) {
+                    inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+                }));
+                scene.onBeforeRenderObservable.add(() => {
+                    var keydown = false;
+                    if (inputMap["w"] || inputMap["ArrowUp"]) {
+                        scene.getMeshByName("Box").position.z += 0.1
+                        scene.getMeshByName("Box").rotation.y = 0
+                        console.log("w");
+                        keydown = true;
+                    }
+                    if (inputMap["a"] || inputMap["ArrowLeft"]) {
+                        scene.getMeshByName("Box").position.x -= 0.1
+                        scene.getMeshByName("Box").rotation.y = 3 * Math.PI / 2
+                        console.log("a");
+                        keydown = true;
+                    }
+                    if (inputMap["s"] || inputMap["ArrowDown"]) {
+                        scene.getMeshByName("Box").position.z -= 0.1
+                        scene.getMeshByName("Box").rotation.y = 2 * Math.PI / 2
+                        console.log("s");
+                        keydown = true;
+                    }
+                    if (inputMap["d"] || inputMap["ArrowRight"]) {
+                        scene.getMeshByName("Box").position.x += 0.1
+                        scene.getMeshByName("Box").rotation.y = Math.PI / 2
+                        console.log("d");
+                        keydown = true;
+                    }
+                });
+                */
+                scene.render();
+            });
         });
-
-    });
-        
-
     </script>
 
 </body>
+
 </html>
