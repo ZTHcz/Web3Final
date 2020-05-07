@@ -26,6 +26,7 @@
 
             var engine = new BABYLON.Engine(canvas, true);
             engine.enableOfflineSupport = false; // Dont require a manifest file
+            var respawnPoint;
             var createScene = function () {
                 var scene = new BABYLON.Scene(engine);
                 scene.clearColor = new BABYLON.Color3.Gray();
@@ -34,22 +35,427 @@
                 scene.enablePhysics(gravityVector, physicsPlugin);
 
                 var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), scene); 1
+                //skybox
+                var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:2000.0}, scene);
+                var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+                skyboxMaterial.backFaceCulling = false;
+                skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./textures/sky2", scene);
+                skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+                skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+                skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+                skybox.material = skyboxMaterial;
 
                 //ground
-                var ground = BABYLON.MeshBuilder.CreateGround("ground", { height: 500, width: 500, subdivisions: 4 }, scene);
-                ground.material = new BABYLON.StandardMaterial("material2", scene);
-                ground.material.diffuseColor = BABYLON.Color3.Green();
-                //player box
-                var playerBox = BABYLON.Mesh.CreateBox("Box", 4.0, scene);
-                playerBox.position = new BABYLON.Vector3(0, 3, 0);
-                playerBox.material = new BABYLON.StandardMaterial("material", scene);
-                playerBox.material.diffuseColor = BABYLON.Color3.Blue();
+                var ground = BABYLON.MeshBuilder.CreateGround("ground", { height: 1000, width: 1000, subdivisions: 4 }, scene);
+                var groundMat = new BABYLON.StandardMaterial("groundMat", scene);
+                var groundCheck = BABYLON.MeshBuilder.CreateBox("groundCheck", {height: .5, width: 1000, depth: 1000}, scene);
+                groundCheck.isVisible = false;
+                groundMat.diffuseColor = BABYLON.Color3.Green();
+                ground.material = groundMat;
+                
+                //load textures
+                var playMat = new BABYLON.StandardMaterial("playMat", scene);
+                playMat.diffuseTexture = new BABYLON.Texture("./textures/cat.png");
+                playMat.diffuseTexture.hasAlpha = true;
+                playMat.backFaceCulling = false;
+                var platMat1 = new BABYLON.StandardMaterial("platMat1", scene);
+                platMat1.diffuseTexture = new BABYLON.Texture("./textures/rocks.jpg", scene);
+                var platMat2 = new BABYLON.StandardMaterial("platMat2", scene);
+                platMat2.diffuseTexture = new BABYLON.Texture("./textures/stone.jpg", scene);
+                var platMat3 = new BABYLON.StandardMaterial("platMat3", scene);
+                platMat3.diffuseTexture = new BABYLON.Texture("./textures/bricks.jpg", scene);
+                var platMat4 = new BABYLON.StandardMaterial("platMat4", scene);
+                platMat4.diffuseTexture = new BABYLON.Texture("./textures/metal.jpg", scene);
+                var platMat5 = new BABYLON.StandardMaterial("platMat5", scene);
+                platMat5.diffuseTexture = new BABYLON.Texture("./textures/alien.jpg", scene);
+                var platMat6 = new BABYLON.StandardMaterial("platMat6", scene);
+                platMat6.diffuseTexture = new BABYLON.Texture("./textures/win.jpg", scene);
+                var winPlat = new BABYLON.StandardMaterial("winPlat", scene);
+                winPlat.diffuseTexture = new BABYLON.Texture("./textures/gold.jpg", scene);
+                
+                //player
+                var player = BABYLON.MeshBuilder.CreateBox("player", { width: .5, height: .5, depth: .5 }, scene);
+                player.material = playMat;
+                player.position = new BABYLON.Vector3(0,1,0);
 
-                //load knight model (not working)
+                //level 1
+                var plat1 = new BABYLON.MeshBuilder.CreateBox("plat1", { width: 2, height: 2, depth: 2 }, scene);
+                plat1.position = new BABYLON.Vector3(0,0,-5);
+                plat1.material = platMat1;
+                var plat2 = new BABYLON.MeshBuilder.CreateBox("plat2", { width: 2, height: 2, depth: 2 }, scene);
+                plat2.position = new BABYLON.Vector3(0,1,-7);
+                plat2.material = platMat1;
+                var plat3 = new BABYLON.MeshBuilder.CreateBox("plat3", { width: 2, height: 2, depth: 2 }, scene);
+                plat3.position = new BABYLON.Vector3(0,2,-9);
+                plat3.material = platMat1;
+                var plat4 = new BABYLON.MeshBuilder.CreateBox("plat4", { width: 2, height: 2, depth: 2 }, scene);
+                plat4.position = new BABYLON.Vector3(0,3,-11);
+                plat4.material = platMat1;
+                var plat5 = new BABYLON.MeshBuilder.CreateBox("plat5", { width: 2, height: 2, depth: 2 }, scene);
+                plat5.position = new BABYLON.Vector3(0,4,-13);
+                plat5.material = platMat1;
+                var plat6 = new BABYLON.MeshBuilder.CreateBox("plat6", { width: 2, height: 2, depth: 2 }, scene);
+                plat6.position = new BABYLON.Vector3(0,5,-15);
+                plat6.material = platMat1;
+                var plat7 = new BABYLON.MeshBuilder.CreateBox("plat7", { width: 2, height: 2, depth: 2 }, scene);
+                plat7.position = new BABYLON.Vector3(0,6,-17);
+                plat7.material = platMat1;
+                var plat8 = new BABYLON.MeshBuilder.CreateBox("plat8", { width: 2, height: 2, depth: 2 }, scene);
+                plat8.position = new BABYLON.Vector3(0,7,-19);
+                plat8.material = platMat1;
+                var plat9 = new BABYLON.MeshBuilder.CreateBox("plat9", { width: 2, height: 2, depth: 2 }, scene);
+                plat9.position = new BABYLON.Vector3(0,8,-21);
+                plat9.material = platMat1;
+                var plat10 = new BABYLON.MeshBuilder.CreateBox("plat10", { width: 2, height: 2, depth: 2 }, scene);
+                plat10.position = new BABYLON.Vector3(0,9,-23);
+                plat10.material = platMat1;
+                var check1 = new BABYLON.MeshBuilder.CreateBox("check1", { width:2, height: .5, depth: 2}, scene);
+                check1.position = new BABYLON.Vector3(0,10,-23)
+                check1.isVisible = false;
+
+                //level 2
+                var step = new BABYLON.MeshBuilder.CreateBox("step", { width: 2, height: 2, depth: 2 }, scene);
+                step.position = new BABYLON.Vector3(-3,9,-23);
+                step.material = platMat2;
+                var step2 = new BABYLON.MeshBuilder.CreateBox("step2", { width: 2, height: 2, depth: 2 }, scene);
+                step2.position = new BABYLON.Vector3(-6,9,-23);
+                step2.material = platMat2;
+                var step3 = new BABYLON.MeshBuilder.CreateBox("step3", { width: 2, height: 2, depth: 2 }, scene);
+                step3.position = new BABYLON.Vector3(-9,10,-23);
+                step3.material = platMat2;
+                var step4 = new BABYLON.MeshBuilder.CreateBox("step4", { width: 2, height: 2, depth: 2 }, scene);
+                step4.position = new BABYLON.Vector3(-12,12,-23);
+                step4.material = platMat2;
+                var step5 = new BABYLON.MeshBuilder.CreateBox("step5", { width: 2, height: 2, depth: 2 }, scene);
+                step5.position = new BABYLON.Vector3(-15,13,-23);
+                step5.material = platMat2;
+                var step6 = new BABYLON.MeshBuilder.CreateBox("step6", { width: 2, height: 2, depth: 2 }, scene);
+                step6.position = new BABYLON.Vector3(-18,12,-23);
+                step6.material = platMat2;
+                var step7 = new BABYLON.MeshBuilder.CreateBox("step7", { width: 2, height: 2, depth: 2 }, scene);
+                step7.position = new BABYLON.Vector3(-21,14,-23);
+                step7.material = platMat2;
+                var step8 = new BABYLON.MeshBuilder.CreateBox("step8", { width: 2, height: 2, depth: 2 }, scene);
+                step8.position = new BABYLON.Vector3(-25,16,-23);
+                step8.material = platMat2;
+                var step9 = new BABYLON.MeshBuilder.CreateBox("step9", { width: 2, height: 2, depth: 2 }, scene);
+                step9.position = new BABYLON.Vector3(-28,17,-23);
+                step9.material = platMat2;
+                var step10 = new BABYLON.MeshBuilder.CreateBox("step10", { width: 2, height: 2, depth: 2 }, scene);
+                step10.position = new BABYLON.Vector3(-32,18,-23);
+                step10.material = platMat2;
+                var check2 = new BABYLON.MeshBuilder.CreateBox("check2", { width:2, height: .5, depth: 2}, scene);
+                check2.position = new BABYLON.Vector3(-32,19,-23);
+                check2.isVisible = false;
+
+                //level 3
+                var diag = new BABYLON.MeshBuilder.CreateBox("diag", { width: 2, height: 2, depth: 2 }, scene);
+                diag.position = new BABYLON.Vector3(-34,18,-21);
+                diag.material = platMat3;
+                var diag2 = new BABYLON.MeshBuilder.CreateBox("diag2", { width: 2, height: 2, depth: 2 }, scene);
+                diag2.position = new BABYLON.Vector3(-32,18,-18);
+                diag2.material = platMat3;
+                var diag3 = new BABYLON.MeshBuilder.CreateBox("diag3", { width: 2, height: 2, depth: 2 }, scene);
+                diag3.position = new BABYLON.Vector3(-34,19,-16);
+                diag3.material = platMat3;
+                var diag4 = new BABYLON.MeshBuilder.CreateBox("diag4", { width: 2, height: 2, depth: 2 }, scene);
+                diag4.position = new BABYLON.Vector3(-35,20,-13);
+                diag4.material = platMat3;
+                var diag5 = new BABYLON.MeshBuilder.CreateBox("diag5", { width: 2, height: 2, depth: 2 }, scene);
+                diag5.position = new BABYLON.Vector3(-34,20,-10);
+                diag5.material = platMat3;
+                var diag6 = new BABYLON.MeshBuilder.CreateBox("diag6", { width: 2, height: 2, depth: 2 }, scene);
+                diag6.position = new BABYLON.Vector3(-33,22,-8);
+                diag6.material = platMat3;
+                var diag7 = new BABYLON.MeshBuilder.CreateBox("diag7", { width: 2, height: 2, depth: 2 }, scene);
+                diag7.position = new BABYLON.Vector3(-32,19,-6);
+                diag7.material = platMat3;
+                var diag8 = new BABYLON.MeshBuilder.CreateBox("diag8", { width: 2, height: 2, depth: 2 }, scene);
+                diag8.position = new BABYLON.Vector3(-35,19,-4);
+                diag8.material = platMat3;
+                var diag9 = new BABYLON.MeshBuilder.CreateBox("diag9", { width: 2, height: 2, depth: 2 }, scene);
+                diag9.position = new BABYLON.Vector3(-31,19,0);
+                diag9.material = platMat3;
+                var diag10 = new BABYLON.MeshBuilder.CreateBox("diag10", { width: 2, height: 2, depth: 2 }, scene);
+                diag10.position = new BABYLON.Vector3(-33,21,2);
+                diag10.material = platMat3;
+                var diag11 = new BABYLON.MeshBuilder.CreateBox("diag11", { width: 2, height: 2, depth: 2 }, scene);
+                diag11.position = new BABYLON.Vector3(-32,22,3);
+                diag11.material = platMat3;
+                var check3 = new BABYLON.MeshBuilder.CreateBox("check3", { width:2, height: .5, depth: 2}, scene);
+                check3.position = new BABYLON.Vector3(-32,23,3);
+                check3.isVisible = false;
+
+                //level 4
+                var move = new BABYLON.MeshBuilder.CreateBox("move", { width: 2, height: 2, depth: 2 }, scene);
+                move.position = new BABYLON.Vector3(-30,22,3);
+                move.material = platMat4;
+                var move2 = new BABYLON.MeshBuilder.CreateBox("move2", { width: 2, height: 2, depth: 2 }, scene);
+                move2.position = new BABYLON.Vector3(-27,23,3);
+                move2.material = platMat4;
+                var move3 = new BABYLON.MeshBuilder.CreateBox("move3", { width: 2, height: 2, depth: 2 }, scene);
+                move3.position = new BABYLON.Vector3(-24,21,3);
+                move3.material = platMat4;
+                var move4 = new BABYLON.MeshBuilder.CreateBox("move4", { width: 2, height: 2, depth: 2 }, scene);
+                move4.position = new BABYLON.Vector3(-21,20,3);
+                move4.material = platMat4;
+                var move5 = new BABYLON.MeshBuilder.CreateBox("move5", { width: 2, height: 2, depth: 2 }, scene);
+                move5.position = new BABYLON.Vector3(-18,21,3);
+                move5.material = platMat4;
+                var move6 = new BABYLON.MeshBuilder.CreateBox("move6", { width: 2, height: 2, depth: 2 }, scene);
+                move6.position = new BABYLON.Vector3(-15,19,3);
+                move6.material = platMat4;
+                var move7 = new BABYLON.MeshBuilder.CreateBox("move7", { width: 2, height: 2, depth: 2 }, scene);
+                move7.position = new BABYLON.Vector3(-12,20,3);
+                move7.material = platMat4;
+                var move8 = new BABYLON.MeshBuilder.CreateBox("move8", { width: 2, height: 2, depth: 2 }, scene);
+                move8.position = new BABYLON.Vector3(-9,21,3);
+                move8.material = platMat4;
+                var move9 = new BABYLON.MeshBuilder.CreateBox("move9", { width: 2, height: 2, depth: 2 }, scene);
+                move9.position = new BABYLON.Vector3(-6,22,3);
+                move9.material = platMat4;
+                var check4 = new BABYLON.MeshBuilder.CreateBox("check4", { width:2, height: .5, depth: 2}, scene);
+                check4.position = new BABYLON.Vector3(-6,23,3);
+                check4.isVisible = false;
+                var alpha = Math.PI;
+                scene.registerBeforeRender(function(){
+                    alpha += 0.01;
+                    move.position.y += Math.cos(alpha) / 50;
+                    move3.position.y = move.position.y - 1;
+                    move5.position.y = move.position.y;
+                    move7.position.y = move.position.y - 2;
+                    move2.position.y += Math.cos(alpha) / -50;
+                    move4.position.y = move2.position.y - 3;
+                    move6.position.y = move2.position.y - 4;
+                    move8.position.y = move2.position.y - 2;
+                });
+
+                //level 5
+                var side = new BABYLON.MeshBuilder.CreateBox("side", { width: 2, height: 2, depth: 2 }, scene);
+                side.position = new BABYLON.Vector3(-6,22,0);
+                side.material = platMat5;
+                var side2 = new BABYLON.MeshBuilder.CreateBox("side2", { width: 2, height: 2, depth: 2 }, scene);
+                side2.position = new BABYLON.Vector3(-5,22,-3);
+                side2.material = platMat5;
+                var side3 = new BABYLON.MeshBuilder.CreateBox("side3", { width: 2, height: 2, depth: 2 }, scene);
+                side3.position = new BABYLON.Vector3(-4,22,-6);
+                side3.material = platMat5;
+                var side4 = new BABYLON.MeshBuilder.CreateBox("side4", { width: 2, height: 2, depth: 2 }, scene);
+                side4.position = new BABYLON.Vector3(-5,22,-9);
+                side4.material = platMat5;
+                var side5 = new BABYLON.MeshBuilder.CreateBox("side5", { width: 2, height: 2, depth: 2 }, scene);
+                side5.position = new BABYLON.Vector3(-6,22,-12);
+                side5.material = platMat5;
+                var side6 = new BABYLON.MeshBuilder.CreateBox("side6", { width: 2, height: 2, depth: 2 }, scene);
+                side6.position = new BABYLON.Vector3(-5,22,-15);
+                side6.material = platMat5;
+                var side7 = new BABYLON.MeshBuilder.CreateBox("side7", { width: 4, height: 1, depth: 4 }, scene);
+                side7.position = new BABYLON.Vector3(-5,22,-20);
+                side7.material = platMat6;
+                var check5 = new BABYLON.MeshBuilder.CreateBox("check5", { width:4, height: .5, depth: 4}, scene);
+                check5.position = new BABYLON.Vector3(-5,23,-20);
+                check5.isVisible = false;
+                scene.registerBeforeRender(function(){
+                    alpha += 0.01;
+                    side.position.x += Math.cos(alpha) / 100;
+                    side3.position.x = side.position.x;
+                    side5.position.x = side.position.x;
+                    side2.position.x += Math.cos(alpha) / -100;
+                    side4.position.x = side2.position.x;
+                    side6.position.x = side2.position.x;
+
+                });
+
+                //level 6
+                //static
+                var fina = new BABYLON.MeshBuilder.CreateBox("fina", { width: 2, height: 2, depth: 2 }, scene);
+                fina.position = new BABYLON.Vector3(-8,22,-20);
+                fina.material = platMat6;
+                var fina2 = new BABYLON.MeshBuilder.CreateBox("fina2", { width: 2, height: 2, depth: 2 }, scene);
+                fina2.position = new BABYLON.Vector3(-10,23,-20);
+                fina2.material = platMat6;
+                var fina3 = new BABYLON.MeshBuilder.CreateBox("fina3", { width: 2, height: 2, depth: 2 }, scene);
+                fina3.position = new BABYLON.Vector3(-13,24,-20);
+                fina3.material = platMat6;
+                var fina4 = new BABYLON.MeshBuilder.CreateBox("fina4", { width: 2, height: 2, depth: 2 }, scene);
+                fina4.position = new BABYLON.Vector3(-16,26,-20);
+                fina4.material = platMat6;
+                var fina5 = new BABYLON.MeshBuilder.CreateBox("fina5", { width: 2, height: 2, depth: 2 }, scene);
+                fina5.position = new BABYLON.Vector3(-19,27,-19);
+                fina5.material = platMat6;
+                var fina6 = new BABYLON.MeshBuilder.CreateBox("fina6", { width: 2, height: 2, depth: 2 }, scene);
+                fina6.position = new BABYLON.Vector3(-20,28,-20);
+                fina6.material = platMat6;
+                //up down
+                var fina7 = new BABYLON.MeshBuilder.CreateBox("fina7", { width: 2, height: 2, depth: 2 }, scene);
+                fina7.position = new BABYLON.Vector3(-23,28,-20);
+                fina7.material = platMat6;
+                var fina8 = new BABYLON.MeshBuilder.CreateBox("fina8", { width: 2, height: 2, depth: 2 }, scene);
+                fina8.position = new BABYLON.Vector3(-26,26,-20);
+                fina8.material = platMat6;
+                scene.registerBeforeRender(function(){
+                    alpha += 0.01;
+                    fina7.position.y += Math.cos(alpha) / 50;
+                    fina8.position.y += Math.cos(alpha) / -50;
+                });
+                //side side
+                var fina9 = new BABYLON.MeshBuilder.CreateBox("fina9", { width: 2, height: 2, depth: 2 }, scene);
+                fina9.position = new BABYLON.Vector3(-29,27,-20);
+                fina9.material = platMat6;
+                var fina10 = new BABYLON.MeshBuilder.CreateBox("fina10", { width: 2, height: 2, depth: 2 }, scene);
+                fina10.position = new BABYLON.Vector3(-32,28,-20);
+                fina10.material = platMat6;
+                scene.registerBeforeRender(function(){
+                    alpha += 0.01;
+                    fina9.position.z += Math.cos(alpha) / 100;
+                    fina10.position.z += Math.cos(alpha) / -100;
+                });
+                //win cube
+                var winCube = new BABYLON.MeshBuilder.CreateBox("winCube", { width: 5, height: 5, depth: 5 }, scene);
+                winCube.position = new BABYLON.Vector3(-36,28,-20);
+                winCube.material = winPlat;
+                var winCheck = new BABYLON.MeshBuilder.CreateBox("winCheck", { width:5, height: .5, depth: 5}, scene);
+                winCheck.position = new BABYLON.Vector3(-36,31,-20);
+                winCheck.isVisible = false;
+                
+                //camera
+                //follow cam
+                var fCam = new BABYLON.FollowCamera("fCam", new BABYLON.Vector3(10,10,10), scene);
+                fCam.radius = 7;
+                fCam.heightOffset = 1;
+                fCam.rotationOffset = 0;
+                fCam.cameraAcceleration = 0.05;
+                fCam.maxCameraSpeed = 10;
+                fCam.attachControl(canvas,true);
+                fCam.lockedTarget = player
+                fCam.upperHeightOffsetLimit = 10;
+                fCam.lowerHeightOffsetLimit = 0;
+                fCam.upperRadiusLimit = 15;
+                fCam.lowerRadiusLimit = 2;
+                //fCam.upperRotationOffsetLimit = 90;
+                //fCam.lowerRotationOffsetLimit = -90;
+
+
                 /*
-                BABYLON.SceneLoader.ImportMesh("Circle", "./models/", "knight.babylon", this._scene, function(newMeshes, particleSystems, skeleton){
+                var camera = new BABYLON.ArcRotateCamera("arcCam",
+                    BABYLON.Tools.ToRadians(45),
+                    BABYLON.Tools.ToRadians(45),
+                    10.0, player.position, scene);
+                camera.attachControl(canvas, true);
+                */
+
+                //enable physics
+                player.physicsImpostor = new BABYLON.PhysicsImpostor(player, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 20, friction: 5, restitution: 0.0 } , scene);
+                ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                plat1.physicsImpostor = new BABYLON.PhysicsImpostor(plat1, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                plat2.physicsImpostor = new BABYLON.PhysicsImpostor(plat2, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                plat3.physicsImpostor = new BABYLON.PhysicsImpostor(plat3, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                plat4.physicsImpostor = new BABYLON.PhysicsImpostor(plat4, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                plat5.physicsImpostor = new BABYLON.PhysicsImpostor(plat5, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                plat6.physicsImpostor = new BABYLON.PhysicsImpostor(plat6, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                plat7.physicsImpostor = new BABYLON.PhysicsImpostor(plat7, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                plat8.physicsImpostor = new BABYLON.PhysicsImpostor(plat8, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                plat9.physicsImpostor = new BABYLON.PhysicsImpostor(plat9, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                plat10.physicsImpostor = new BABYLON.PhysicsImpostor(plat10, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                step.physicsImpostor = new BABYLON.PhysicsImpostor(step, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                step2.physicsImpostor = new BABYLON.PhysicsImpostor(step2, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                step3.physicsImpostor = new BABYLON.PhysicsImpostor(step3, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                step4.physicsImpostor = new BABYLON.PhysicsImpostor(step4, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                step5.physicsImpostor = new BABYLON.PhysicsImpostor(step5, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                step6.physicsImpostor = new BABYLON.PhysicsImpostor(step6, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                step7.physicsImpostor = new BABYLON.PhysicsImpostor(step7, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                step8.physicsImpostor = new BABYLON.PhysicsImpostor(step8, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                step9.physicsImpostor = new BABYLON.PhysicsImpostor(step9, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                step10.physicsImpostor = new BABYLON.PhysicsImpostor(step10, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                diag.physicsImpostor = new BABYLON.PhysicsImpostor(diag, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                diag2.physicsImpostor = new BABYLON.PhysicsImpostor(diag2, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                diag3.physicsImpostor = new BABYLON.PhysicsImpostor(diag3, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                diag4.physicsImpostor = new BABYLON.PhysicsImpostor(diag4, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                diag5.physicsImpostor = new BABYLON.PhysicsImpostor(diag5, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                diag6.physicsImpostor = new BABYLON.PhysicsImpostor(diag6, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                diag7.physicsImpostor = new BABYLON.PhysicsImpostor(diag7, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                diag8.physicsImpostor = new BABYLON.PhysicsImpostor(diag8, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                diag9.physicsImpostor = new BABYLON.PhysicsImpostor(diag9, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                diag10.physicsImpostor = new BABYLON.PhysicsImpostor(diag10, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                diag11.physicsImpostor = new BABYLON.PhysicsImpostor(diag11, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                move.physicsImpostor = new BABYLON.PhysicsImpostor(move, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                move2.physicsImpostor = new BABYLON.PhysicsImpostor(move2, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                move3.physicsImpostor = new BABYLON.PhysicsImpostor(move3, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                move4.physicsImpostor = new BABYLON.PhysicsImpostor(move4, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                move5.physicsImpostor = new BABYLON.PhysicsImpostor(move5, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                move6.physicsImpostor = new BABYLON.PhysicsImpostor(move6, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                move7.physicsImpostor = new BABYLON.PhysicsImpostor(move7, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                move8.physicsImpostor = new BABYLON.PhysicsImpostor(move8, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                move9.physicsImpostor = new BABYLON.PhysicsImpostor(move9, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.1 }, scene);
+                side.physicsImpostor = new BABYLON.PhysicsImpostor(side, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                side2.physicsImpostor = new BABYLON.PhysicsImpostor(side2, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                side3.physicsImpostor = new BABYLON.PhysicsImpostor(side3, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                side4.physicsImpostor = new BABYLON.PhysicsImpostor(side4, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                side5.physicsImpostor = new BABYLON.PhysicsImpostor(side5, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                side6.physicsImpostor = new BABYLON.PhysicsImpostor(side6, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                side7.physicsImpostor = new BABYLON.PhysicsImpostor(side7, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                fina.physicsImpostor = new BABYLON.PhysicsImpostor(fina, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                fina2.physicsImpostor = new BABYLON.PhysicsImpostor(fina2, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                fina3.physicsImpostor = new BABYLON.PhysicsImpostor(fina3, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                fina4.physicsImpostor = new BABYLON.PhysicsImpostor(fina4, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                fina5.physicsImpostor = new BABYLON.PhysicsImpostor(fina5, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                fina6.physicsImpostor = new BABYLON.PhysicsImpostor(fina6, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                fina7.physicsImpostor = new BABYLON.PhysicsImpostor(fina7, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                fina8.physicsImpostor = new BABYLON.PhysicsImpostor(fina8, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                fina9.physicsImpostor = new BABYLON.PhysicsImpostor(fina9, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                fina10.physicsImpostor = new BABYLON.PhysicsImpostor(fina10, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+                winCube.physicsImpostor = new BABYLON.PhysicsImpostor(winCube, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 5, restitution: 0.1 }, scene);
+
+                //testBox.physicsImpostor = new BABYLON.PhysicsImpostor(testBox, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 1, restitution: 0.7 }, scene);
+                var jumpDirection = new BABYLON.Vector3(0, 1, 0);
+                var jumpHeight = 5;
+                var contactLocalRefPoint = new BABYLON.Vector3(0, 0, 0);
+
+                //keyboard input
+                var inputMap = {};
+                scene.actionManager = new BABYLON.ActionManager(scene);
+                scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {
+                    inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+                }));
+                scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function (evt) {
+                    inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+                }));
+                scene.onBeforeRenderObservable.add(()=>{
+                            var keydown = false;
+                            if(inputMap["w"] || inputMap["ArrowUp"]){
+                                player.position.z-=0.1
+                                player.rotation.y = 0
+                                keydown=true;
+                            } 
+                            if(inputMap["a"] || inputMap["ArrowLeft"]){
+                                player.position.x+=0.1
+                                player.rotation.y = 3*Math.PI/2
+                                keydown=true;
+                            } 
+                            if(inputMap["s"] || inputMap["ArrowDown"]){
+                                player.position.z+=0.1
+                                player.rotation.y = 2*Math.PI/2
+                                keydown=true;
+                            } 
+                            if(inputMap["d"] || inputMap["ArrowRight"]){
+                                player.position.x-=0.1
+                                player.rotation.y = Math.PI/2
+                                keydown=true;
+                            }
+                            if(inputMap[" "]){
+                                player.physicsImpostor.applyImpulse(jumpDirection.scale(jumpHeight), player.getAbsolutePosition().add(contactLocalRefPoint));
+                                keydown=true;
+                            }
+                });
+               
+                //respawn
+                
+                //load knight model
+                /*
+                var knight = BABYLON.SceneLoader.ImportMesh("Circle", "./models/", "knight.babylon", this._scene, function(newMeshes, particleSystems, skeletons){
                     try{
                         var skeleton = skeletons[0];
+                        
                         skeleton.animationPropertiesOverride = new BABYLON.AnimationPropertiesOverride();
                         skeleton.animationPropertiesOverride.enableBlending = true;
                         skeleton.animationPropertiesOverride.blendingSpeed = 0.05;
@@ -62,23 +468,27 @@
                         scene.onBeforeRenderObservable.add(()=>{
                             var keydown = false;
                             if(inputMap["w"] || inputMap["ArrowUp"]){
-                                newMeshes[0].position.z+=0.1
+                                newMeshes[0].position.z-=0.1
                                 newMeshes[0].rotation.y = 0
                                 keydown=true;
                             } 
                             if(inputMap["a"] || inputMap["ArrowLeft"]){
-                                newMeshes[0].position.x-=0.1
+                                newMeshes[0].position.x+=0.1
                                 newMeshes[0].rotation.y = 3*Math.PI/2
                                 keydown=true;
                             } 
                             if(inputMap["s"] || inputMap["ArrowDown"]){
-                                newMeshes[0].position.z-=0.1
+                                newMeshes[0].position.z+=0.1
                                 newMeshes[0].rotation.y = 2*Math.PI/2
                                 keydown=true;
                             } 
                             if(inputMap["d"] || inputMap["ArrowRight"]){
-                                newMeshes[0].position.x+=0.1
+                                newMeshes[0].position.x-=0.1
                                 newMeshes[0].rotation.y = Math.PI/2
+                                keydown=true;
+                            }
+                            if(inputMap[" "]){
+                                newMeshes[0].position.y+=.01
                                 keydown=true;
                             }
                             if(keydown){
@@ -95,115 +505,39 @@
                 });
                 */
 
-                //camera
-                /*
-                var camera = new BABYLON.FollowCamera("followCam", BABYLON.Vector3.Zero(), scene);
-                camera.target = playerBox;
-                camera.radius = 50;
-                camera.heightOffset = 5;
-                camera.attachControl(canvas,true);
-                scene.activeCamera = camera;
-                */
-                var camera = new BABYLON.ArcRotateCamera("arcCam",
-                    BABYLON.Tools.ToRadians(45),
-                    BABYLON.Tools.ToRadians(45),
-                    10.0, playerBox.position, scene);
-                camera.attachControl(canvas, true);
-
-                //enable physics
-                playerBox.physicsImpostor = new BABYLON.PhysicsImpostor(playerBox, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 2, friction: 0.0, restitution: 0.3 }, scene);
-                ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.0, restitution: 0.7 }, scene);
-
-                //Keyboard
                 return scene;
             }
 
             var scene = createScene();
             engine.runRenderLoop(function () {
-                document.addEventListener('keydown', function(event) {
-                    if(event.keyCode == 87) {
-                        console.log("W");
-                        scene.getMeshByName("Box").position.z += 0.01;
-                        if(scene.getMeshByName("Box").position.y < 0){
-                            console.log("fell off");
-                            scene.getMeshByName("Box").collisionsEnabled = false;
-                            scene.getMeshByName("Box").setPositionWithLocalVector(new BABYLON.Vector3(0, 3, 0));
-                            scene.getMeshByName("Box").collisionsEnabled = true;
-                        }
-                        scene.getMeshByName("Box").position.x == 0;
+
+                if(scene.getMeshByName("player").intersectsMesh(scene.getMeshByName("groundCheck"), false)){
+                    if(respawnPoint != null){
+                        scene.getMeshByName("player").position = respawnPoint;
                     }
-                    if(event.keyCode == 65) {
-                        console.log("A");
-                        scene.getMeshByName("Box").position.x -= 0.01;
-                        if(scene.getMeshByName("Box").position.y < 0){
-                            console.log("fell off");
-                            scene.getMeshByName("Box").collisionsEnabled = false;
-                            scene.getMeshByName("Box").setPositionWithLocalVector(new BABYLON.Vector3(0, 3, 0));
-                            scene.getMeshByName("Box").collisionsEnabled = true;
-                        }
-                        scene.getMeshByName("Box").position.x == 0;
-                    }
-                    if(event.keyCode == 83){
-                        console.log("S");
-                        scene.getMeshByName("Box").position.z -= 0.01;
-                            if(scene.getMeshByName("Box").position.y < 0){
-                            console.log("fell off");
-                            scene.getMeshByName("Box").collisionsEnabled = false;
-                            scene.getMeshByName("Box").setPositionWithLocalVector(new BABYLON.Vector3(0, 3, 0));
-                            scene.getMeshByName("Box").collisionsEnabled = true;
-                        }
-                        scene.getMeshByName("Box").position.x == 0;
-                    }
-                    if(event.keyCode == 68) {
-                        console.log("D");
-                        scene.getMeshByName("Box").position.x += 0.01
-                        if(scene.getMeshByName("Box").position.y < 0){
-                            console.log("fell off");
-                            scene.getMeshByName("Box").collisionsEnabled = false;
-                            scene.getMeshByName("Box").setPositionWithLocalVector(new BABYLON.Vector3(0, 3, 0));
-                            scene.getMeshByName("Box").collisionsEnabled = true;
-                        }
-                        scene.getMeshByName("Box").position.x == 0;
-                    }
-                });
-                // Keyboard events reference
-                /*
-                var inputMap = {};
-                scene.actionManager = new BABYLON.ActionManager(scene);
-                scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {
-                    inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
-                }));
-                scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function (evt) {
-                    inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
-                }));
-                scene.onBeforeRenderObservable.add(() => {
-                    var keydown = false;
-                    if (inputMap["w"] || inputMap["ArrowUp"]) {
-                        scene.getMeshByName("Box").position.z += 0.1
-                        scene.getMeshByName("Box").rotation.y = 0
-                        console.log("w");
-                        keydown = true;
-                    }
-                    if (inputMap["a"] || inputMap["ArrowLeft"]) {
-                        scene.getMeshByName("Box").position.x -= 0.1
-                        scene.getMeshByName("Box").rotation.y = 3 * Math.PI / 2
-                        console.log("a");
-                        keydown = true;
-                    }
-                    if (inputMap["s"] || inputMap["ArrowDown"]) {
-                        scene.getMeshByName("Box").position.z -= 0.1
-                        scene.getMeshByName("Box").rotation.y = 2 * Math.PI / 2
-                        console.log("s");
-                        keydown = true;
-                    }
-                    if (inputMap["d"] || inputMap["ArrowRight"]) {
-                        scene.getMeshByName("Box").position.x += 0.1
-                        scene.getMeshByName("Box").rotation.y = Math.PI / 2
-                        console.log("d");
-                        keydown = true;
-                    }
-                });
-                */
+                }
+                 //checkpoints
+                if(scene.getMeshByName("player").intersectsMesh(scene.getMeshByName("check1"), false)){
+                    respawnPoint = new BABYLON.Vector3(0,11,-23);
+                }
+                if(scene.getMeshByName("player").intersectsMesh(scene.getMeshByName("check2"), false)){
+                    respawnPoint = new BABYLON.Vector3(-32,20,-23);
+                }
+                if(scene.getMeshByName("player").intersectsMesh(scene.getMeshByName("check3"), false)){
+                    respawnPoint = new BABYLON.Vector3(-32,23,3);
+                }
+                if(scene.getMeshByName("player").intersectsMesh(scene.getMeshByName("check4"), false)){
+                    respawnPoint = new BABYLON.Vector3(-6,24,3);
+                }
+                if(scene.getMeshByName("player").intersectsMesh(scene.getMeshByName("check5"), false)){
+                    respawnPoint = new BABYLON.Vector3(-5,24,-20);
+                }
+                if(scene.getMeshByName("player").intersectsMesh(scene.getMeshByName("winCheck"), false)){
+                    alert("YOU WIN!")
+                    respawnPoint = new BABYLON.Vector3(0,1,0);
+                    scene.getMeshByName("player").position = respawnPoint;
+                }
+
                 scene.render();
             });
         });
